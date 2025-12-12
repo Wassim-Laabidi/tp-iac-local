@@ -7,40 +7,49 @@ terraform {
   }
 }
 
-provider "docker" {
-  host = "unix:///var/run/docker.sock"  
-}
+provider "docker" {}
+
+# ---- PostgreSQL ----
 
 resource "docker_image" "postgres_image" {
   name         = "postgres:latest"
   keep_locally = true
 }
+
 resource "docker_container" "db_container" {
-  name  = "db-postgres"
-  image = docker_image.postgres_image.image_id
+  name  = "tp-db-postgres"
+  image = docker_image.postgres_image.name
+
+
   ports {
     internal = 5432
     external = 5432
   }
+
   env = [
     "POSTGRES_USER=${var.db_user}",
     "POSTGRES_PASSWORD=${var.db_password}",
-    "POSTGRES_DB=${var.db_name}"
+    "POSTGRES_DB=${var.db_name}",
   ]
 }
+
+# ---- Application Web ----
+
 resource "docker_image" "app_image" {
-  name = "web-app:latest"
+  name = "tp-web-app:latest"
+
   build {
-    context    = "${path.module}"
+    context    = "."
     dockerfile = "Dockerfile_app"
   }
 }
+
 resource "docker_container" "app_container" {
-  name  = "app-web"
-  image = docker_image.app_image.image_id
-  depends_on = [
-    docker_container.db_container
-  ]
+  name  = "tp-app-web"
+  image = docker_image.app_image.name
+
+  depends_on = [docker_container.db_container]
+
   ports {
     internal = 80
     external = var.app_port_external

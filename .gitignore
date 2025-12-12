@@ -1,6 +1,4 @@
-.terraform/
 terraform.tfstate
 terraform.tfstate.backup
-*.tfvars
-*.log
-.docker/
+.terraform/
+.terraform.lock.hcl
