@@ -16,5 +16,5 @@ variable "db_password" {
 variable "app_port_external" {
   description = "Port externe pour accéder à l'application web"
   type        = number
-  default     = 8080
+  default     = 8081
 }
